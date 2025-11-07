@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const io = require('@actions/io');
 const {Readable} = require('stream');
+const {exec} = require('child_process');
 
 // arch in [arm, x32, x64...] (https://nodejs.org/api/os.html#os_os_arch)
 // return value in [amd64, 386, arm]
@@ -138,7 +139,16 @@ async function downloadCLI({version, logging, githubToken, acceptDraft}) {
  * @param connRetryCount Number of connection retries
  * @param connRetryWait Time to wait between connection retries
  */
-async function configureCLI({yontrackUrl, yontrackToken, yontrackLocalConfig, connRetryCount, connRetryWait, dir, cliExecutable, logging}) {
+async function configureCLI({
+                                yontrackUrl,
+                                yontrackToken,
+                                yontrackLocalConfig,
+                                connRetryCount,
+                                connRetryWait,
+                                dir,
+                                cliExecutable,
+                                logging
+                            }) {
     if (logging) console.log(`Yontrack URL set to ${yontrackUrl}`)
     if (logging) console.log(`Yontrack token set to ${yontrackToken ? yontrackToken.length : 0} characters`)
     if (!yontrackToken) {
@@ -146,15 +156,23 @@ async function configureCLI({yontrackUrl, yontrackToken, yontrackLocalConfig, co
     }
 
     const exe = `${dir}/${cliExecutable}`
-
-    let args = ['config', 'create', yontrackLocalConfig, yontrackUrl, '--token', yontrackToken]
+    let command = `${exe} config create ${yontrackLocalConfig} ${yontrackUrl} --token ${yontrackToken}`
     if (connRetryCount) {
-        args.push('--conn-retry-count', connRetryCount)
+        command += ` --conn-retry-count ${connRetryCount}`
     }
     if (connRetryWait) {
-        args.push('--conn-retry-wait', connRetryWait)
+        command += ` --conn-retry-wait ${connRetryWait}`
     }
-    await exec.exec(exe, args)
+
+    exec(command, (error, stdout, stderr) => {
+        if (error) {
+            throw `Error: ${error.message}`;
+        }
+        if (stderr) {
+            throw `stderr: ${stderr}`;
+        }
+        if (logging) console.log(`stdout: ${stdout}`);
+    });
 }
 
 /**
