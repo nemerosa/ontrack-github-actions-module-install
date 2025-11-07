@@ -92,7 +92,7 @@ async function downloadAndSetup({downloadUrl, cliName, logging}) {
  * @param logging Whether to log the download process
  * @return `cliExecutable` (name of the CLI) and `dir` (directory where the CLI is installed)
  */
-const download = async ({version, githubToken, acceptDraft = false, logging = false}) => {
+const install = async ({version, githubToken, acceptDraft = false, logging = false}) => {
     if (!version) {
         if (logging) console.log("No version provided. Getting the latest version from GitHub.")
         if (!githubToken) {
@@ -133,7 +133,7 @@ const download = async ({version, githubToken, acceptDraft = false, logging = fa
 };
 
 const cli = {
-    download,
+    install,
 }
 
 module.exports = cli;
