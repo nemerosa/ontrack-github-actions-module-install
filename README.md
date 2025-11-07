@@ -10,6 +10,8 @@ npm login --scope=@nemerosa --registry=https://npm.pkg.github.com
 npm install @nemerosa/ontrack-github-actions-module-install
 ```
 
+> Use a GitHub token with the `read:packages` scope as a password.
+
 # Usage
 
 ```javascript
