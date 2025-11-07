@@ -184,6 +184,8 @@ async function configureCLI({
  * @param yontrackUrl URL of the Yontrack instance (if defined, the CLI is configured to connect to this instance)
  * @param yontrackToken Token used to connect to the Yontrack instance
  * @param yontrackLocalConfig Name of the local configuration to define
+ * @param connRetryCount Number of connection retries
+ * @param connRetryWait Time to wait between connection retries
  * @return Object containing:
  *   - `cliExecutable` (name of the CLI)
  *   - `dir` (directory where the CLI is installed)
@@ -197,6 +199,8 @@ const install = async ({
                            yontrackUrl,
                            yontrackToken,
                            yontrackLocalConfig = "default",
+                           connRetryCount,
+                           connRetryWait,
                        }) => {
 
     // Downloading the CLI
@@ -209,7 +213,16 @@ const install = async ({
 
     // Configuration
     if (yontrackUrl) {
-        await configureCLI({yontrackUrl, yontrackToken, yontrackLocalConfig, dir, cliExecutable, logging})
+        await configureCLI({
+            yontrackUrl,
+            yontrackToken,
+            yontrackLocalConfig,
+            dir,
+            cliExecutable,
+            logging,
+            connRetryCount,
+            connRetryWait,
+        })
     }
 
     // OK
