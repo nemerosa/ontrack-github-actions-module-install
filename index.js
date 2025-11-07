@@ -1,4 +1,4 @@
-const {fetch} = require('cross-fetch');
+// const {fetch} = require('cross-fetch');
 const github = require('@actions/github');
 
 const download = async ({version, githubToken, acceptDraft, logging}) => {
