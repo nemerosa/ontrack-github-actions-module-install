@@ -22,8 +22,8 @@
   },
   "homepage": "https://github.com/nemerosa/ontrack-github-actions-module-install",
   "dependencies": {
-    "cross-fetch": "^4.1.0",
-    "@actions/github": "^6.0.1"
+    "@actions/github": "^6.0.1",
+    "@actions/io": "^2.0.0"
   },
   "devDependencies": {
     "eslint": "^9.39.1",

@@ -1,6 +1,9 @@
-// const {fetch} = require('cross-fetch');
 const github = require('@actions/github');
 const os = require("os");
+const fs = require("fs");
+const path = require("path");
+const io = require('@actions/io');
+const { Readable } = require('stream');
 
 // arch in [arm, x32, x64...] (https://nodejs.org/api/os.html#os_os_arch)
 // return value in [amd64, 386, arm]
@@ -21,8 +24,75 @@ function mapOS(os) {
     return mappings[os] || os;
 }
 
+/**
+ * Downloads a file from a URL to a temporary location
+ * @param url URL to download from
+ * @return Path to the downloaded file
+ */
+async function downloadFile(url) {
+    const tempDir = os.tmpdir();
+    const fileName = path.basename(url);
+    const filePath = path.join(tempDir, fileName);
 
-const download = async ({version, githubToken, acceptDraft, logging}) => {
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+        throw new Error(`Failed to download: ${response.status} ${response.statusText}`);
+    }
+
+    const fileStream = fs.createWriteStream(filePath);
+    
+    // Convert Web ReadableStream to Node.js stream and pipe it
+    const nodeStream = Readable.fromWeb(response.body);
+
+    return new Promise((resolve, reject) => {
+        nodeStream.pipe(fileStream);
+        fileStream.on('finish', () => resolve(filePath));
+        fileStream.on('error', reject);
+        nodeStream.on('error', reject);
+    });
+}
+
+/**
+ * Downloads the CLI and returns the path where it is installed.
+ * @param downloadUrl URL to download the CLI from
+ * @param cliName Name of the CLI to download (yontrack by default)
+ * @param logging Whether to log the download process
+ * @return `cliExecutable` (name of the CLI) and `dir` (directory where the CLI is installed)
+ */
+async function downloadAndSetup({downloadUrl, cliName, logging}) {
+    const cliPath = await downloadFile(downloadUrl);
+    if (logging) console.log(`Downloaded at ${cliPath}`)
+
+    // Make the download executable
+    if (!os.platform().startsWith('win')) {
+        await fs.chmodSync(cliPath, '766')
+    }
+
+    const dir = path.dirname(cliPath)
+    if (logging) console.log(`Directory is ${dir}`)
+
+    // If we're on Windows, then the executable ends with .exe
+    const exeSuffix = os.platform().startsWith('win') ? '.exe' : '';
+
+    const cliExecutable = `${cliName}${exeSuffix}`;
+    await io.mv(cliPath, [dir, cliExecutable].join(path.sep))
+
+    return {
+        dir,
+        cliExecutable,
+    }
+}
+
+/**
+ * Downloads the CLI and returns the path where it is installed.
+ * @param version Version of the CLI to download (if not provided, the latest version is downloaded)
+ * @param githubToken GitHub token to use to download the latest version of the CLI (not used if a version is provided)
+ * @param acceptDraft Whether to accept draft releases
+ * @param logging Whether to log the download process
+ * @return `cliExecutable` (name of the CLI) and `dir` (directory where the CLI is installed)
+ */
+const download = async ({version, githubToken, acceptDraft = false, logging = false}) => {
     if (!version) {
         if (logging) console.log("No version provided. Getting the latest version from GitHub.")
         if (!githubToken) {
@@ -57,6 +127,9 @@ const download = async ({version, githubToken, acceptDraft, logging}) => {
     // Getting the URL to the CLI
     const downloadUrl = `https://github.com/nemerosa/ontrack-cli/releases/download/${version}/${cliName}-${osPlatform}-${osArch}`;
     if (logging) console.log(`Downloading CLI from ${downloadUrl}`);
+
+    // Downloading
+    return await downloadAndSetup({downloadUrl, cliName, logging})
 };
 
 const cli = {
