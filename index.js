@@ -84,15 +84,7 @@ async function downloadAndSetup({downloadUrl, cliName, logging}) {
     }
 }
 
-/**
- * Downloads the CLI and returns the path where it is installed.
- * @param version Version of the CLI to download (if not provided, the latest version is downloaded)
- * @param githubToken GitHub token to use to download the latest version of the CLI (not used if a version is provided)
- * @param acceptDraft Whether to accept draft releases
- * @param logging Whether to log the download process
- * @return `cliExecutable` (name of the CLI) and `dir` (directory where the CLI is installed)
- */
-const install = async ({version, githubToken, acceptDraft = false, logging = false}) => {
+async function downloadCLI({version, logging, githubToken, acceptDraft}) {
     if (!version) {
         if (logging) console.log("No version provided. Getting the latest version from GitHub.")
         if (!githubToken) {
@@ -129,7 +121,33 @@ const install = async ({version, githubToken, acceptDraft = false, logging = fal
     if (logging) console.log(`Downloading CLI from ${downloadUrl}`);
 
     // Downloading
-    return await downloadAndSetup({downloadUrl, cliName, logging})
+    const {dir, cliExecutable} = await downloadAndSetup({downloadUrl, cliName, logging})
+
+    return {version, dir, cliExecutable};
+}
+
+/**
+ * Downloads the CLI and returns the path where it is installed.
+ * @param version Version of the CLI to download (if not provided, the latest version is downloaded)
+ * @param githubToken GitHub token to use to download the latest version of the CLI (not used if a version is provided)
+ * @param acceptDraft Whether to accept draft releases
+ * @param logging Whether to log the download process
+ * @return Object containing:
+ *   - `cliExecutable` (name of the CLI)
+ *   - `dir` (directory where the CLI is installed)
+ *   - `version` (actual version of the CLI)
+ */
+const install = async ({version, githubToken, acceptDraft = false, logging = false}) => {
+
+    // Downloading the CLI
+    const {version: actualVersion, dir, cliExecutable} = await downloadCLI({version, logging, githubToken, acceptDraft});
+
+    // OK
+    return {
+        version: actualVersion,
+        dir,
+        cliExecutable,
+    }
 };
 
 const cli = {
