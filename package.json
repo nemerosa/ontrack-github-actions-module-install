@@ -1,6 +1,6 @@
 {
   "name": "@nemerosa/ontrack-github-actions-module-install",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Reusable NPM module to download and install the Yontrack CLI",
   "main": "index.js",
   "scripts": {
