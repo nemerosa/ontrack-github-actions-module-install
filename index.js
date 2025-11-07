@@ -3,7 +3,7 @@ const os = require("os");
 const fs = require("fs");
 const path = require("path");
 const io = require('@actions/io');
-const { Readable } = require('stream');
+const {Readable} = require('stream');
 
 // arch in [arm, x32, x64...] (https://nodejs.org/api/os.html#os_os_arch)
 // return value in [amd64, 386, arm]
@@ -35,13 +35,13 @@ async function downloadFile(url) {
     const filePath = path.join(tempDir, fileName);
 
     const response = await fetch(url);
-    
+
     if (!response.ok) {
         throw new Error(`Failed to download: ${response.status} ${response.statusText}`);
     }
 
     const fileStream = fs.createWriteStream(filePath);
-    
+
     // Convert Web ReadableStream to Node.js stream and pipe it
     const nodeStream = Readable.fromWeb(response.body);
 
@@ -127,20 +127,72 @@ async function downloadCLI({version, logging, githubToken, acceptDraft}) {
 }
 
 /**
+ * Configures the CLI.
+ *
+ * @param yontrackUrl URL of the Yontrack instance (if defined, the CLI is configured to connect to this instance)
+ * @param yontrackToken Token used to connect to the Yontrack instance
+ * @param yontrackLocalConfig Name of the local configuration to define
+ * @param dir Directory where the CLI is installed
+ * @param cliExecutable Name of the CLI executable
+ * @param logging Whether to log the configuration process
+ * @param connRetryCount Number of connection retries
+ * @param connRetryWait Time to wait between connection retries
+ */
+async function configureCLI({yontrackUrl, yontrackToken, yontrackLocalConfig, connRetryCount, connRetryWait, dir, cliExecutable, logging}) {
+    if (logging) console.log(`Yontrack URL set to ${yontrackUrl}`)
+    if (logging) console.log(`Yontrack token set to ${yontrackToken ? yontrackToken.length : 0} characters`)
+    if (!yontrackToken) {
+        throw "Yontrack token must be provided in order to configure the CLI."
+    }
+
+    const exe = `${dir}/${cliExecutable}`
+
+    let args = ['config', 'create', yontrackLocalConfig, yontrackUrl, '--token', yontrackToken]
+    if (connRetryCount) {
+        args.push('--conn-retry-count', connRetryCount)
+    }
+    if (connRetryWait) {
+        args.push('--conn-retry-wait', connRetryWait)
+    }
+    await exec.exec(exe, args)
+}
+
+/**
  * Downloads the CLI and returns the path where it is installed.
  * @param version Version of the CLI to download (if not provided, the latest version is downloaded)
  * @param githubToken GitHub token to use to download the latest version of the CLI (not used if a version is provided)
  * @param acceptDraft Whether to accept draft releases
  * @param logging Whether to log the download process
+ * @param yontrackUrl URL of the Yontrack instance (if defined, the CLI is configured to connect to this instance)
+ * @param yontrackToken Token used to connect to the Yontrack instance
+ * @param yontrackLocalConfig Name of the local configuration to define
  * @return Object containing:
  *   - `cliExecutable` (name of the CLI)
  *   - `dir` (directory where the CLI is installed)
  *   - `version` (actual version of the CLI)
  */
-const install = async ({version, githubToken, acceptDraft = false, logging = false}) => {
+const install = async ({
+                           version,
+                           githubToken,
+                           acceptDraft = false,
+                           logging = false,
+                           yontrackUrl,
+                           yontrackToken,
+                           yontrackLocalConfig = "default",
+                       }) => {
 
     // Downloading the CLI
-    const {version: actualVersion, dir, cliExecutable} = await downloadCLI({version, logging, githubToken, acceptDraft});
+    const {version: actualVersion, dir, cliExecutable} = await downloadCLI({
+        version,
+        logging,
+        githubToken,
+        acceptDraft
+    });
+
+    // Configuration
+    if (yontrackUrl) {
+        await configureCLI({yontrackUrl, yontrackToken, yontrackLocalConfig, dir, cliExecutable, logging})
+    }
 
     // OK
     return {
