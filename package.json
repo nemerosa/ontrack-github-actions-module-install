@@ -1,0 +1,36 @@
+{
+  "name": "@nemerosa/ontrack-github-actions-module-install",
+  "version": "0.1.0",
+  "description": "Reusable NPM module to download and install the Yontrack CLI",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "jest --passWithNoTests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nemerosa/ontrack-github-actions-module-install.git"
+  },
+  "keywords": [
+    "ontrack",
+    "graphql"
+  ],
+  "author": "Damien Coraboeuf",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nemerosa/ontrack-github-actions-module-install/issues"
+  },
+  "homepage": "https://github.com/nemerosa/ontrack-github-actions-module-install",
+  "dependencies": {
+    "cross-fetch": "^4.1.0",
+    "@actions/github": "^6.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.1",
+    "jest": "^30.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/npm": "^13.1.1",
+    "semantic-release": "^25.0.1"
+  }
+}
