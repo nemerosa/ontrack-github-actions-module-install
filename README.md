@@ -1,43 +1,24 @@
-ontrack-github-action-client
-============================
+ontrack-github-actions-module-install
+=====================================
 
-Reusable low-level Ontrack GraphQL client for GitHub Actions.
+Reusable JS module to download and configure the Yontrack CLI.
 
 # Installation
 
 ```bash
 npm login --scope=@nemerosa --registry=https://npm.pkg.github.com
-npm install @nemerosa/ontrack-github-action-client
+npm install @nemerosa/ontrack-github-actions-module-install
 ```
 
 # Usage
 
 ```javascript
-const client = require('@nemerosa/ontrack-github-action-client');
+const client = require('@nemerosa/ontrack-github-actions-module-install');
 
-// logging: true or false or undefined
-const clientEnvironment = client.checkEnvironment(logging);
-
-// Performing the call
-const result = client.graphQL(clientEnvironment, query, variables, logging);
+// Downloading and configuring the client using a known version (recommended)
+const {dir} = client.install({
+    version: '5.0.0',
+    yontrackUrl: 'https://yontrack.example.com',
+    yontrackToken: 'xxxx',
+});
 ```
-
-# Prerequisites
-
-The following environment variables must be available:
-
-* `ONTRACK_URL` - the root URL of the Ontrack installation
-* `ONTRACK_TOKEN` - the Ontrack authentication token
-
-Typically, these will be defined at repository or organization level and exposed to the GitHub Actions workflow:
-
-```yaml
-env:
-  ONTRACK_URL: "${{ vars.ONTRACK_URL }}"
-  ONTRACK_TOKEN: "${{ secrets.ONTRACK_TOKEN }}"
-```
-
-# See also
-
-* [`ontrack-github-ingestion-build-links`](https://github/nemerosa/ontrack-github-ingestion-build-links)
-
