@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/nemerosa/ontrack-github-actions-module-install/compare/v1.1.0...v1.2.0) (2025-11-07)
+
+
+### Features
+
+* connection retry parameters ([86ecb70](https://github.com/nemerosa/ontrack-github-actions-module-install/commit/86ecb7031e9db3cf6fb916606cc9dbe84c54ee38))
+
 # [1.1.0](https://github.com/nemerosa/ontrack-github-actions-module-install/compare/v1.0.0...v1.1.0) (2025-11-07)
 
 
