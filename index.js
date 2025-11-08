@@ -164,7 +164,7 @@ async function configureCLI({
         command += ` --conn-retry-wait ${connRetryWait}`
     }
 
-    exec(command, (error, stdout, stderr) => {
+    await exec(command, (error, stdout, stderr) => {
         if (error) {
             throw `Error: ${error.message}`;
         }
