@@ -6,6 +6,10 @@ on:
       - main
   pull_request:
 
+env:
+  YONTRACK_URL: ${{ vars.YONTRACK_URL }}
+  YONTRACK_TOKEN: ${{ secrets.YONTRACK_TOKEN }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
