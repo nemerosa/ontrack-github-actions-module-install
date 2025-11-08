@@ -164,14 +164,19 @@ async function configureCLI({
         command += ` --conn-retry-wait ${connRetryWait}`
     }
 
-    await exec(command, (error, stdout, stderr) => {
-        if (error) {
-            throw `Error: ${error.message}`;
-        }
-        if (stderr) {
-            throw `stderr: ${stderr}`;
-        }
-        if (logging) console.log(`stdout: ${stdout}`);
+    return new Promise((resolve, reject) => {
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                reject(new Error(`Error: ${error.message}`));
+                return;
+            }
+            if (stderr) {
+                reject(new Error(`stderr: ${stderr}`));
+                return;
+            }
+            if (logging) console.log(`stdout: ${stdout}`);
+            resolve();
+        });
     });
 }
 

@@ -106,3 +106,5 @@ dist
 # IDE
 /.idea
 
+# Tests
+.yontrack-config.yaml

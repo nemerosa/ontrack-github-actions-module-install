@@ -1,5 +1,7 @@
 const cli = require('./index')
 const {execSync} = require('child_process')
+const io = require('@actions/io')
+const path = require('path')
 
 const testVersion = '5.0.0-alpha+006'
 
@@ -24,6 +26,9 @@ test('downloading the CLI using the latest version', async () => {
 })
 
 test('creation of the configuration', async () => {
+    const configPath = path.join(process.cwd(), '.yontrack-config.yaml')
+    await io.rmRF(configPath)
+
     const yontrackUrl = process.env.YONTRACK_URL
     const yontrackToken = process.env.YONTRACK_TOKEN
     if (!yontrackUrl || !yontrackToken) {
