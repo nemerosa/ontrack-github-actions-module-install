@@ -1,3 +1,11 @@
+## [1.2.1](https://github.com/nemerosa/ontrack-github-actions-module-install/compare/v1.2.0...v1.2.1) (2025-11-08)
+
+
+### Bug Fixes
+
+* config test ([efd2c5e](https://github.com/nemerosa/ontrack-github-actions-module-install/commit/efd2c5e2a856507c6bc767fa2ca3bb229b2dfd52))
+* missing `await` ([c32684c](https://github.com/nemerosa/ontrack-github-actions-module-install/commit/c32684cb540692fd92839c38da56a44fa077a737))
+
 # [1.2.0](https://github.com/nemerosa/ontrack-github-actions-module-install/compare/v1.1.0...v1.2.0) (2025-11-07)
 
 
