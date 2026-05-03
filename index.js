@@ -89,7 +89,7 @@ async function downloadCLI({version, logging, githubToken, acceptDraft}) {
         if (!githubToken) {
             throw "GitHub token must be provided in order to get the latest version of the CLI."
         }
-        const { default: github } = await import('@actions/github');
+        const github = await import('@actions/github');
         const octokit = github.getOctokit(githubToken)
         const releases = await octokit.rest.repos.listReleases({
             owner: "nemerosa",
