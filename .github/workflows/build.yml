@@ -17,29 +17,47 @@ jobs:
       contents: write
       packages: write
       issues: write
+
     steps:
-      - id: checkout
-        uses: actions/checkout@v4
-      - id: setup-node
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@v6
         with:
-          node-version: '20.x'
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
           registry-url: 'https://npm.pkg.github.com'
           scope: '@nemerosa'
-      - id: npm-ci
-        run: npm ci
 
-      - id: npm-lint
-        run: npm run lint
+      - run: npm ci
 
-      - name: npm-test
+      - run: npm run lint
+
+      - name: Test
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run test
+        run: npm test
 
-      - id: npm-publish
+      - name: Semantic release
+        id: release
         if: ${{ github.ref == 'refs/heads/main' }}
-        run: npx semantic-release
+        run: |
+          npx semantic-release
+          VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update floating major/minor tags
+        if: ${{ github.ref == 'refs/heads/main' && steps.release.outputs.version != '' }}
+        run: |
+          VERSION="${{ steps.release.outputs.version }}"
+          [[ "$VERSION" =~ ^v([0-9]+)\.([0-9]+)\.[0-9]+$ ]] || exit 0
+          MAJOR="v${BASH_REMATCH[1]}"
+          MINOR="v${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"
+          git tag -f "$MAJOR" "$VERSION"
+          git tag -f "$MINOR" "$VERSION"
+          git push origin -f "$MAJOR" "$MINOR"
