@@ -1,6 +1,5 @@
 const cli = require('./index')
 const {execSync} = require('child_process')
-const io = require('@actions/io')
 const path = require('path')
 
 const testVersion = '5.0.0-alpha+006'
@@ -32,7 +31,7 @@ testWithToken('downloading the CLI using the latest version', async () => {
 
 testWithYontrack('creation of the configuration', async () => {
     const configPath = path.join(process.cwd(), '.yontrack-config.yaml')
-    await io.rmRF(configPath)
+    await require('fs').promises.rm(configPath, { force: true })
 
     const {dir, cliExecutable} = await cli.install({
         logging: true,
