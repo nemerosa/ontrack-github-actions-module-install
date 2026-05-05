@@ -1,3 +1,11 @@
+# [2.0.0](https://github.com/nemerosa/ontrack-github-actions-module-install/compare/v1.2.1...v2.0.0) (2026-05-05)
+
+
+### Bug Fixes
+
+* pass --experimental-vm-modules to jest for dynamic ESM imports ([3723c7c](https://github.com/nemerosa/ontrack-github-actions-module-install/commit/3723c7c5b150276609a1ce26770f4169d4feaa1c))
+* use namespace import for @actions/github (no default export) ([eaef455](https://github.com/nemerosa/ontrack-github-actions-module-install/commit/eaef455a632e05ac91ef919598af9c1785c7d723))
+
 ## [1.2.1](https://github.com/nemerosa/ontrack-github-actions-module-install/compare/v1.2.0...v1.2.1) (2025-11-08)
 
 
