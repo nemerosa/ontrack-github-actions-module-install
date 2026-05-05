@@ -1,8 +1,6 @@
-const github = require('@actions/github');
 const os = require("os");
 const fs = require("fs");
 const path = require("path");
-const io = require('@actions/io');
 const {Readable} = require('stream');
 const {exec} = require('child_process');
 
@@ -77,7 +75,7 @@ async function downloadAndSetup({downloadUrl, cliName, logging}) {
     const exeSuffix = os.platform().startsWith('win') ? '.exe' : '';
 
     const cliExecutable = `${cliName}${exeSuffix}`;
-    await io.mv(cliPath, [dir, cliExecutable].join(path.sep))
+    await fs.promises.rename(cliPath, [dir, cliExecutable].join(path.sep))
 
     return {
         dir,
@@ -91,6 +89,7 @@ async function downloadCLI({version, logging, githubToken, acceptDraft}) {
         if (!githubToken) {
             throw "GitHub token must be provided in order to get the latest version of the CLI."
         }
+        const github = await import('@actions/github');
         const octokit = github.getOctokit(githubToken)
         const releases = await octokit.rest.repos.listReleases({
             owner: "nemerosa",
