@@ -13,7 +13,7 @@ There is no `build` step in this repo — it is a plain Node.js library, not a b
 
 ## Architecture
 
-This is a reusable Node.js module published as `@nemerosa/ontrack-github-actions-module-install` to GitHub Packages. It is consumed by other `ontrack-github-actions-*` repos to download and configure the [Yontrack CLI](https://github.com/nemerosa/ontrack-cli).
+This is a reusable Node.js module published as `@nemerosa/ontrack-github-actions-module-install` to GitHub Packages. It is consumed by other `ontrack-github-actions-*` repos to download and configure the [Yontrack CLI](https://github.com/yontrack/yontrack-cli).
 
 **Public API** (`index.js`):
 
@@ -33,7 +33,7 @@ const { dir, cliExecutable, version } = await cli.install({
 ```
 
 **Flow:**
-1. `downloadCLI` — resolves the version (latest GitHub release if none provided), maps `os.platform()`/`os.arch()` to the binary suffix, downloads from the `nemerosa/ontrack-cli` GitHub releases, and writes the binary to a tmp dir.
+1. `downloadCLI` — resolves the version (latest GitHub release if none provided), maps `os.platform()`/`os.arch()` to the binary suffix (plus `.exe` on Windows), downloads from the `yontrack/yontrack-cli` GitHub releases, and writes the binary to a tmp dir.
 2. `configureCLI` — when `yontrackUrl` is set, runs `yontrack config create ...` to set up the local CLI config.
 
 **Tests** (`index.test.js`) are integration tests that hit the real network and (optionally) a real Yontrack instance. Tests requiring `GITHUB_TOKEN`, `YONTRACK_URL`, or `YONTRACK_TOKEN` are gated to skip when those env vars are unset, so PR CI without secrets passes cleanly.
@@ -42,7 +42,7 @@ const { dir, cliExecutable, version } = await cli.install({
 
 Releases are automated via `semantic-release` (`.releaserc`). Commit messages follow Angular convention. With the configured `releaseRules`, every conventional-commit type triggers at least a patch; `feat` is minor; `refactor` and any commit with a `BREAKING CHANGE:` footer (or `type!:` shorthand) is major.
 
-The CI workflow on `main`:
+The CI workflow runs lint and tests on both `ubuntu-latest` and `windows-latest`. The release steps run on the Linux leg only, on `main`:
 1. Runs `npx semantic-release` — publishes to GH Packages, commits an updated `CHANGELOG.md` / `package.json` / `package-lock.json` via `@semantic-release/git`, and creates a `vX.Y.Z` GitHub release.
 2. Force-updates floating `vX` and `vX.Y` tags to point at the new release, so consumers can pin to a major/minor and ride patch updates.
 

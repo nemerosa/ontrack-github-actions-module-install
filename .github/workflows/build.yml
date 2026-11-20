@@ -12,7 +12,11 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     permissions:
       contents: write
       packages: write
@@ -42,7 +46,7 @@ jobs:
 
       - name: Semantic release
         id: release
-        if: ${{ github.ref == 'refs/heads/main' }}
+        if: ${{ runner.os == 'Linux' && github.ref == 'refs/heads/main' }}
         run: |
           npx semantic-release
           VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
@@ -52,7 +56,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update floating major/minor tags
-        if: ${{ github.ref == 'refs/heads/main' && steps.release.outputs.version != '' }}
+        if: ${{ runner.os == 'Linux' && github.ref == 'refs/heads/main' && steps.release.outputs.version != '' }}
         run: |
           VERSION="${{ steps.release.outputs.version }}"
           [[ "$VERSION" =~ ^v([0-9]+)\.([0-9]+)\.[0-9]+$ ]] || exit 0
