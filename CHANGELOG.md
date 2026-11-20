@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/nemerosa/ontrack-github-actions-module-install/compare/v2.0.0...v2.0.1) (2026-11-20)
+
+
+### Bug Fixes
+
+* download the .exe release asset on Windows ([888940a](https://github.com/nemerosa/ontrack-github-actions-module-install/commit/888940a8d9223e90ea0f17dec360a021b8ff6f94)), closes [#2](https://github.com/nemerosa/ontrack-github-actions-module-install/issues/2)
+
 # [2.0.0](https://github.com/nemerosa/ontrack-github-actions-module-install/compare/v1.2.1...v2.0.0) (2026-05-05)
 
 
