@@ -14,6 +14,18 @@ function mapArch(arch) {
     return mappings[arch] || arch;
 }
 
+// GitHub repository publishing the CLI releases
+const cliRepository = {owner: "yontrack", repo: "yontrack-cli"};
+
+function isWindows() {
+    return os.platform().startsWith('win');
+}
+
+// Windows executables carry the .exe suffix, both as release assets and once installed
+function exeSuffix() {
+    return isWindows() ? '.exe' : '';
+}
+
 // os in [darwin, linux, win32...] (https://nodejs.org/api/os.html#os_os_platform)
 // return value in [darwin, linux, windows]
 function mapOS(os) {
@@ -46,7 +58,8 @@ async function downloadFile(url) {
 
     return new Promise((resolve, reject) => {
         nodeStream.pipe(fileStream);
-        fileStream.on('finish', () => resolve(filePath));
+        // 'close' rather than 'finish': the handle must be released before the file is renamed (Windows)
+        fileStream.on('close', () => resolve(filePath));
         fileStream.on('error', reject);
         nodeStream.on('error', reject);
     });
@@ -64,18 +77,15 @@ async function downloadAndSetup({downloadUrl, cliName, logging}) {
     if (logging) console.log(`Downloaded at ${cliPath}`)
 
     // Make the download executable
-    if (!os.platform().startsWith('win')) {
+    if (!isWindows()) {
         await fs.chmodSync(cliPath, '766')
     }
 
     const dir = path.dirname(cliPath)
     if (logging) console.log(`Directory is ${dir}`)
 
-    // If we're on Windows, then the executable ends with .exe
-    const exeSuffix = os.platform().startsWith('win') ? '.exe' : '';
-
-    const cliExecutable = `${cliName}${exeSuffix}`;
-    await fs.promises.rename(cliPath, [dir, cliExecutable].join(path.sep))
+    const cliExecutable = `${cliName}${exeSuffix()}`;
+    await fs.promises.rename(cliPath, path.join(dir, cliExecutable))
 
     return {
         dir,
@@ -91,10 +101,7 @@ async function downloadCLI({version, logging, githubToken, acceptDraft}) {
         }
         const github = await import('@actions/github');
         const octokit = github.getOctokit(githubToken)
-        const releases = await octokit.rest.repos.listReleases({
-            owner: "nemerosa",
-            repo: "ontrack-cli"
-        })
+        const releases = await octokit.rest.repos.listReleases(cliRepository)
         const lastRelease = releases.data.find(release => acceptDraft || !release.draft)
         if (!lastRelease) {
             if (acceptDraft) {
@@ -117,7 +124,7 @@ async function downloadCLI({version, logging, githubToken, acceptDraft}) {
     const cliName = majorVersion >= 5 ? "yontrack" : "ontrack-cli";
 
     // Getting the URL to the CLI
-    const downloadUrl = `https://github.com/nemerosa/ontrack-cli/releases/download/${version}/${cliName}-${osPlatform}-${osArch}`;
+    const downloadUrl = `https://github.com/${cliRepository.owner}/${cliRepository.repo}/releases/download/${version}/${cliName}-${osPlatform}-${osArch}${exeSuffix()}`;
     if (logging) console.log(`Downloading CLI from ${downloadUrl}`);
 
     // Downloading
@@ -154,7 +161,7 @@ async function configureCLI({
         throw "Yontrack token must be provided in order to configure the CLI."
     }
 
-    const exe = `${dir}/${cliExecutable}`
+    const exe = path.join(dir, cliExecutable)
     let command = `${exe} config create ${yontrackLocalConfig} ${yontrackUrl} --token ${yontrackToken}`
     if (connRetryCount) {
         command += ` --conn-retry-count ${connRetryCount}`
